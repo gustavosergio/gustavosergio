@@ -10,10 +10,9 @@
 
 </div>
 
-## Olá, sou o Gustavo 👋
+## Olá, Me chamo Gustavo 👋
 
-Sou desenvolvedor **Full Stack** e estudante de **Ciência da Computação na Universidade Católica de Pernambuco (UNICAP)**. Construo aplicações web conectando interfaces, dados e regras de negócio — do primeiro esboço à publicação.
-
+Sou desenvolvedor **Full Stack** e estudante de **Ciência da Computação na Universidade Católica de Pernambuco (UNICAP)**. Construo aplicações web conectando interfaces, dados e regras de negócio.
 - 🛍️ Desenvolvo sites, lojas virtuais e aplicações para negócios e profissionais.
 - ⚙️ Trabalho com **React, Next.js, TypeScript, Tailwind CSS e Supabase** em projetos reais.
 - 🔎 Trago uma experiência de estágio em homologação, com foco em qualidade e validação de dados.
