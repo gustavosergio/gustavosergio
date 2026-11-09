@@ -1,0 +1,74 @@
+name: Snake e estatísticas do perfil
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - assets/banner.svg
+      - .github/workflows/snake.yml
+      - .github/scripts/update-stats.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: profile-assets
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Obter arquivos do perfil
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Gerar Snake em temas claro e escuro
+        uses: Platane/snk/svg-only@d8f6715049803e982ee5ff501b6b9b7d5deeb09b # v3
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          outputs: |
+            dist/github-snake.svg
+            dist/github-snake-dark.svg?palette=github-dark
+
+      - name: Atualizar estatísticas públicas
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PROFILE_OWNER: ${{ github.repository_owner }}
+        run: python3 .github/scripts/update-stats.py
+
+      - name: Publicar imagens na branch output
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PROFILE_REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s dist/github-snake.svg
+          test -s dist/github-snake-dark.svg
+          test -s dist/stats.svg
+          cd dist
+          git init -b output
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote add origin "https://github.com/${PROFILE_REPOSITORY}.git"
+          auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          echo "::add-mask::$auth"
+          git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $auth"
+          if git ls-remote --exit-code --heads origin output; then
+            git fetch origin output
+            git reset --soft FETCH_HEAD
+          fi
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'As imagens já estão atualizadas.'
+          else
+            git commit -m 'chore: atualizar Snake e estatísticas públicas'
+            git push origin HEAD:output
+          fi
